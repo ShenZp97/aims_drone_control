@@ -15,11 +15,13 @@ The code was tested with Ubuntu 20.04, Python 3.10 and ROS noetic.
 ## ROS and Mavros
 Install ROS Noetic by following [this](http://wiki.ros.org/noetic/Installation/Ubuntu) or refering to:
 
-`sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'`
-`sudo apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654`
-`sudo apt update`
-`sudo apt install ros-noetic-desktop-full`
-`echo "source /opt/ros/noetic/setup.bash" >> ~/.bashrc`
+```bash
+sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
+sudo apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
+sudo apt update
+sudo apt install ros-noetic-desktop-full
+echo "source /opt/ros/noetic/setup.bash" >> ~/.bashrc
+```
 
 Install Mavros:
 ```bash
@@ -106,15 +108,23 @@ source devel/setup.bash
 
 Now, let's have fun!
 the following commands are available:
+
 Takeoff:
+
 `rostopic pub -1 /drone_command std_msgs/String "{data: 'takeoff'}"`
+
 Give point:
+
 `rostopic pub -1 /goto_position geometry_msgs/PoseStamped "{pose:{position:{x: 1.0, y: 1.0, z: 1.0}, orientation:{w: 1.0, x: 0.0, y: 0.0, z: 0.0}}}"
 `
-Go to this point
+
+Go to this point:
+
 `rostopic pub -1 /drone_command std_msgs/String "{data: 'gotopoint'}"
 `
-Land
+
+Land:
+
 `rostopic pub -1 /drone_command std_msgs/String "{data: 'land'}"
 `
 
