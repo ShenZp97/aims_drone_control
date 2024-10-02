@@ -1,0 +1,47 @@
+mass: 0.5069 # mass
+
+control_hz: 100
+
+l: 0.2 # arm length
+J: [0.000913855, 0.00236242, 0.00279965] # inertial
+g: 9.81 # g
+kt: 1.0 # constant
+km: 0.02 # motor constant
+takeoff_h: 1.0 # takeoff height
+
+max_total_t: 25.0
+min_total_t: 1.0
+
+# drone_frame +
+# drone_frame: +
+# arm_torque = self.l
+# m_tau = np.array([[0, arm_torque, 0, -arm_torque],
+#                       [-arm_torque, 0, arm_torque, 0],
+#                       [km, -km, km, -km]])
+
+# drone_frame x
+# drone_frame: x
+# arm_torque = self.l/np.sqrt(2)
+# m_tau = np.array([[arm_torque, -arm_torque, -arm_torque, arm_torque],
+#                       [-arm_torque, -arm_torque, arm_torque, arm_torque],
+#                       [km, -km, km, -km]])
+
+drone_frame: mavic
+arm_q_r_x: 0.117179
+arm_q_r_y: 0.127453
+
+arm_q_f_x: 0.1148537
+arm_q_f_y: 0.151294
+
+# self.m_tau = np.array([[arm_torque, -arm_torque, -arm_torque, arm_torque],
+#                             [-arm_torque, -arm_torque, arm_torque, arm_torque],
+#                             [self.km, -self.km, self.km, -self.km]])
+
+
+# LQR
+Q: [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+R: [0.1, 0.1, 0.1, 0.1]
+
+# MPC
+q_cost: [0.5, 0.5, 0.5, 0.1, 0.1, 0.1, 0.05, 0.05, 0.05, 0.01, 0.01, 0.01]
+r_cost: [5.0, 5.0, 5.0, 5.0]

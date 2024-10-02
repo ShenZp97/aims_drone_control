@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<launch>
+   <node name="px4_real_exp" pkg="aims_px4_control" type="px4_real_exp.py" output="screen" >
+
+    <!-- For Subscribers -->
+	<remap from="odom" to="vrpn_client_node/aims3/odom" />  
+
+
+
+  </node>  
+</launch>
