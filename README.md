@@ -122,9 +122,14 @@ Takeoff:
 
 `rostopic pub -1 /drone_command std_msgs/String "{data: 'takeoff'}"`
 
+<p align="center">
+    <img src="misc/mavic_world.gif", width="600">
+
+</p>
+
 Give point:
 
-`rostopic pub -1 /goto_position geometry_msgs/PoseStamped "{pose:{position:{x: 1.0, y: 1.0, z: 1.0}, orientation:{w: 1.0, x: 0.0, y: 0.0, z: 0.0}}}"
+`rostopic pub -1 /goto_position geometry_msgs/PoseStamped "{pose:{position:{x: 5.0, y: 5.0, z: 2.0}, orientation:{w: 1.0, x: 0.0, y: 0.0, z: 0.0}}}"
 `
 
 Go to this point:
@@ -132,15 +137,41 @@ Go to this point:
 `rostopic pub -1 /drone_command std_msgs/String "{data: 'gotopoint'}"
 `
 
+<p align="center">
+    <img src="misc/mavic_world_1.gif", width="600">
+
+</p>
+
 Land:
 
 `rostopic pub -1 /drone_command std_msgs/String "{data: 'land'}"
 `
 
+<p align="center">
+    <img src="misc/mavic_world_5.gif", width="600">
+
+</p>
+
 **Note**: if you want to hover at "{pose:{position:{x: 1.0, y: 1.0, z: 1.0}, orientation:{w: 0.0, x: 0.0, y: 0.0, z: 1.0}}}" using LQR, you may need to recompute the LQR gains.
 
 Load trajectory, simply run `rosrun load_traj load_agile_traj.py`. 
 **Please check the trajectory before you run real experiments! Do NOT directly run this trajectory in real-world experiments!** This trajectory is just a example.
+
+<p align="center">
+    <img src="misc/mavic_world_3.gif", width="600">
+
+</p>
+
+<p align="center">
+    <img src="misc/mavic_world_4.gif", width="600">
+
+</p>
+
+The initial state is up-side-down:
+<p align="center">
+    <img src="misc/mavic_world_2.gif", width="600">
+
+</p>
 
 
 ## Real-world experiment with PX4
