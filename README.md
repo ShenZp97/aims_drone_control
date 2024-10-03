@@ -62,9 +62,11 @@ source <PATH_TO_VENV_DIRECTORY>/aims_control_env/bin/activate
 git clone https://github.com/ShenZp97/aims_drone_control.git
 
 cd aims_drone_control
+sudo apt-get install ros-noetic-tf2-sensor-msgs
 pip install -r requirements.txt
 
 ```
+
 
 ## Webots
 
@@ -82,7 +84,6 @@ source <PATH_TO_VENV_DIRECTORY>/aims_control_env/bin/activate
 
 # Source package:
 cd <CATKIN_WS_DIR>/aims_drone_control
-pip install -r requirements.txt
 catkin_make
 source devel/setup.bash
 ```
