@@ -175,6 +175,8 @@ The initial state is up-side-down:
 
 
 ## Real-world experiment with PX4
+**Note!!!:** Real-world experiments can be dangerous. You should understand how the code works. Please make sure you know what you are doing.
+
 Start Mavros and Vicon (you may need to change accordingly, e.g., the fcu_url of mavros, the ip address in vicon launch file, etc.):
 ```
 roslaunch mavros px4.launch fcu_url:=udp://:14560@192.168.50.82:14560
