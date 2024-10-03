@@ -44,7 +44,8 @@ sudo apt install software-properties-common -y
 # Add custom APT repository
 sudo add-apt-repository ppa:deadsnakes/ppa # Press ENTER to confirm adding repository.
 sudo apt update
-Now, create the Python env:
+sudo apt install python3.10 python3.10-venv python3.10-dev
+# Now, create the Python env:
 sudo pip3 install virtualenv
 
 # create virtual env:
