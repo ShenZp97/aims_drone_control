@@ -87,6 +87,8 @@ cd <CATKIN_WS_DIR>/aims_drone_control
 catkin_make
 source devel/setup.bash
 ```
+If missing python-empy when catkin_make, use `pip install empy==3.3.4`.
+
 Remember to change ROS_MASTER_URI in *<CATKIN_WS_DIR>/aims_drone_control/controllers/Mavic_ros1_driver/runtime.ini*
 ```bash
 # Open Webots:
@@ -94,6 +96,8 @@ webots
 ```
 
 **Note**: You should open webots in a terminal where the Python env and the package are sourced. If not, you may find the python telling you that you are missing modules such as aims_msgs or rospy.
+
+**Note**: If you cannot download assets when starting Webots, see [this link](https://www.cyberbotics.com/doc/guide/installation-procedure?version=master#asset-cache-download) to download assets.
 
 The world files are in the worlds folder of this repo. Open Webots, and open the world *mavic_world.wbt* (in *<CATKIN_WS_DIR>/aims_drone_control/worlds*).
 
