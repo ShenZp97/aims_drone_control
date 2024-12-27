@@ -389,7 +389,7 @@ class Quad3DOptimizer:
 
         return 0
 
-    def set_reference_trajectory(self, x_target, u_target):
+    def set_reference_trajectory(self, x_target, u_target, warm_start_option=1):
         """
         Sets the reference trajectory and pre-computes the cost equations for each point in the reference sequence.
         :param x_target: Nx13-dimensional reference trajectory (p_xyz, angle_wxyz, v_xyz, rate_xyz). It is passed in the
@@ -408,14 +408,39 @@ class Quad3DOptimizer:
                 u_target = np.concatenate((u_target, np.expand_dims(u_target[-1, :], 0)), 0)
 
         # self.target = copy(x_target) 
+        # for j in range(self.N):
+        #     ref = np.concatenate((x_target[j, :], u_target[j, :]))
+        #     self.acados_ocp_solver[0].set(j, "yref", ref)
+        #     self.acados_ocp_solver[0].set(j, "x", x_target[j, :])# initial guess
+        #     self.acados_ocp_solver[0].set(j, "u", u_target[j, :])# initial guess
+
         for j in range(self.N):
             ref = np.concatenate((x_target[j, :], u_target[j, :]))
             self.acados_ocp_solver[0].set(j, "yref", ref)
-            self.acados_ocp_solver[0].set(j, "x", x_target[j, :])# initial guess
-            self.acados_ocp_solver[0].set(j, "u", u_target[j, :])# initial guess
+            if warm_start_option == 1:
+                self.acados_ocp_solver[0].set(j, "x", x_target[j, :])  # initial guess
+                self.acados_ocp_solver[0].set(j, "u", u_target[j, :])  # initial guess
+            elif warm_start_option == 2:
+                # Use the last solution as the initial guess
+                if hasattr(self, 'last_solution_x') and hasattr(self, 'last_solution_u'):
+                    self.acados_ocp_solver[0].set(j, "x", self.last_solution_x[j, :])
+                    self.acados_ocp_solver[0].set(j, "u", self.last_solution_u[j, :])
+                else:
+                    self.acados_ocp_solver[0].set(j, "x", x_target[j, :])
+                    self.acados_ocp_solver[0].set(j, "u", u_target[j, :])
+
         # the last MPC node has only a state reference but no input reference
         self.acados_ocp_solver[0].set(self.N, "yref", x_target[self.N, :])
-        self.acados_ocp_solver[0].set(self.N, "x", x_target[self.N, :])# initial guess
+        if warm_start_option == 1:
+            self.acados_ocp_solver[0].set(self.N, "x", x_target[self.N, :])
+        elif warm_start_option == 2:
+            # Use the last solution as the initial guess
+            if hasattr(self, 'last_solution_x') and hasattr(self, 'last_solution_u'):
+                self.acados_ocp_solver[0].set(self.N, "x", self.last_solution_x[self.N, :])
+            else:
+                self.acados_ocp_solver[0].set(self.N, "x", x_target[self.N, :])
+
+        # self.acados_ocp_solver[0].set(self.N, "x", x_target[self.N, :])# initial guess
         return 0
 
     def run_optimization(self, initial_state=None, return_x=False):
@@ -451,6 +476,10 @@ class Quad3DOptimizer:
         for i in range(self.N):
             u_opt_acados[i, :] = self.acados_ocp_solver[0].get(i, "u")
             x_opt_acados[i + 1, :] = self.acados_ocp_solver[0].get(i + 1, "x")
+
+        # Save the last solution for warm starting
+        self.last_solution_x = x_opt_acados
+        self.last_solution_u = u_opt_acados
 
         u_opt_acados = np.reshape(u_opt_acados, (-1))
         return u_opt_acados if not return_x else (u_opt_acados, x_opt_acados)

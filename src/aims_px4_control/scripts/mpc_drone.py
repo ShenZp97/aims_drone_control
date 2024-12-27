@@ -67,7 +67,7 @@ class Quad3DMPC:
     def clear(self):
         self.quad_opt.clear_acados_model()
 
-    def set_reference(self, x_reference:np.ndarray, u_reference=None):
+    def set_reference(self, x_reference:np.ndarray, u_reference=None, warm_start_option=1):
         """
         Sets a target state for the MPC optimizer
         :param x_reference: list with 4 sub-components (position, angle quaternion, velocity, body rate). If these four
@@ -91,7 +91,7 @@ class Quad3DMPC:
                 if x_reference[i, 3]<0.0:
                     x_reference[i, 3:7] *= -1
 
-            return self.quad_opt.set_reference_trajectory(x_reference, u_reference)
+            return self.quad_opt.set_reference_trajectory(x_reference, u_reference, warm_start_option=warm_start_option)
 
     def optimize(self, quad_current_state, return_x=False):
         """

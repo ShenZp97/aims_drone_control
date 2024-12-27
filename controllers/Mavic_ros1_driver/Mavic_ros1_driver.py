@@ -84,6 +84,8 @@ class MavicDriver:
         dir_path = os.path.dirname(os.path.realpath(__file__))
         with open(dir_path+'/config/mavic_config.yaml','r') as f:
             config = yaml.safe_load(f)
+        self.mass = config['mass']
+        self.warm_start_option = config['warm_start_option']
         self.lqrcontroller = LQRController(config)
         drone_config = QuadrotorParam(config)
         self.mpc_controller = Quad3DMPC(drone_config,
@@ -245,18 +247,24 @@ class MavicDriver:
                 cmd = np.zeros(4)
             elif self.state == "trajectory tracking" and self.tracking: # use MPC
                 # rospy.loginfo("MPC tracking.")
-                self.mpc_controller.set_reference(x_ref_mpc, u_ref_mpc)
+                self.mpc_controller.set_reference(x_ref_mpc, u_ref_mpc, warm_start_option=self.warm_start_option)
                 u_opt, x_opt = self.mpc_controller.optimize(state_vi, return_x=True) # note MPC use state_vi
                 # if use x_opt, use x_opt[1,:]
                 cmd = u_opt[:4]
             else:
                 # Use LQR
-                cmd = self.lqrcontroller.controller_thrusts(state, x_des)
+                # cmd = self.lqrcontroller.controller_thrusts(state, x_des)
 
                 # Use MPC. if use x_opt, use x_opt[1,:]
-                # self.mpc_controller.set_reference(x_des)
-                # u_opt, x_opt = self.mpc_controller.optimize(state_vi, return_x=True) # note MPC use state_vi
-                # cmd = u_opt[:4]
+                # interpolate x_ref and u_ref
+                # x_ref_interpolated = np.zeros((self.mpc_controller.n_nodes + 1, self.n_state))
+                # for i in range(7):
+                #     x_ref_interpolated[:, i] = np.linspace(state_vi[i], x_des[i], self.mpc_controller.n_nodes + 1)
+                # u_ref = np.ones((self.mpc_controller.n_nodes, 4)) * (self.mass*9.81/4)
+                # self.mpc_controller.set_reference(x_ref_interpolated, u_ref, warm_start_option=self.warm_start_option)
+                self.mpc_controller.set_reference(x_des)
+                u_opt, x_opt = self.mpc_controller.optimize(state_vi, return_x=True) # note MPC use state_vi
+                cmd = u_opt[:4]
 
 
             t1 = cmd[0]

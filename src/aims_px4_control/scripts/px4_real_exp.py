@@ -31,6 +31,8 @@ class PX4Driver:
             config = yaml.safe_load(f)
         self.lqrcontroller = LQRController(config)
         drone_config = QuadrotorParam(config)
+        self.mass = config['mass']
+        self.warm_start_option = config['warm_start_option']
         self.max_total_t = drone_config.max_total_t
         self.mpc_controller = Quad3DMPC(drone_config,
                                         r_cost=config['r_cost'],
@@ -234,7 +236,7 @@ class PX4Driver:
             t_total = 0.0
         elif self.state == "trajectory tracking" and self.tracking: # use MPC
             # rospy.loginfo("MPC tracking.")
-            self.mpc_controller.set_reference(x_ref_mpc, u_ref_mpc)
+            self.mpc_controller.set_reference(x_ref_mpc, u_ref_mpc, warm_start_option=self.warm_start_option)
             u_opt, x_opt = self.mpc_controller.optimize(state_vi, return_x=True) # note MPC use state_vi
             # if use x_opt, use x_opt[1,:]
             t_total = sum(u_opt[:4])/self.max_total_t
