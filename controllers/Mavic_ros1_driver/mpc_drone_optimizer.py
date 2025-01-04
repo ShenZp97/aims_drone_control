@@ -363,7 +363,7 @@ class Quad3DOptimizer:
 
         return cs.Function('J', [self.x, self.u], [jac])
 
-    def set_reference_state(self, x_target=None, u_target=None):
+    def set_reference_state(self, x_target=None, u_target=None, warm_start_option=2):
         """
         Sets the target state and pre-computes the integration dynamics with cost equations
         :param x_target: 13-dimensional target state (p_xyz, a_wxyz, v_xyz, r_xyz)
@@ -385,7 +385,29 @@ class Quad3DOptimizer:
 
         for j in range(self.N):
             self.acados_ocp_solver[0].set(j, "yref", ref)
+
+            if warm_start_option == 1:
+                self.acados_ocp_solver[0].set(j, "x", x_target)  # initial guess
+                self.acados_ocp_solver[0].set(j, "u", u_target)  # initial guess
+            elif warm_start_option == 2:
+                # Use the last solution as the initial guess
+                if hasattr(self, 'last_solution_x') and hasattr(self, 'last_solution_u'):
+                    self.acados_ocp_solver[0].set(j, "x", self.last_solution_x[j, :])
+                    self.acados_ocp_solver[0].set(j, "u", self.last_solution_u[j, :])
+                else:
+                    self.acados_ocp_solver[0].set(j, "x", x_target)
+                    self.acados_ocp_solver[0].set(j, "u", u_target)
+
         self.acados_ocp_solver[0].set(self.N, "yref", ref[:-4])
+
+        if warm_start_option == 1:
+            self.acados_ocp_solver[0].set(self.N, "x", x_target)
+        elif warm_start_option == 2:
+            # Use the last solution as the initial guess
+            if hasattr(self, 'last_solution_x') and hasattr(self, 'last_solution_u'):
+                self.acados_ocp_solver[0].set(self.N, "x", self.last_solution_x[self.N, :])
+            else:
+                self.acados_ocp_solver[0].set(self.N, "x", x_target)
 
         return 0
 
