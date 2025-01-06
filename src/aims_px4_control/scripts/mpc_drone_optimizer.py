@@ -525,6 +525,7 @@ class QuadrotorParam:
         self.freq = config["control_hz"]
 
         self.max_total_t = config["max_total_t"]
+        self.min_total_t = config["min_total_t"]
 
         self.m_T = np.array([[0, 0, 0, 0],
                             [0, 0, 0, 0],
