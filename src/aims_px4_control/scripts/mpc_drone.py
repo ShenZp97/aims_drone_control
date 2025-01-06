@@ -105,8 +105,8 @@ class Quad3DMPC:
         """
 
         # avoid quaternion flipping
-        if quad_current_state[3]<0.0:
-            quad_current_state[3:7] *= -1
+        # if quad_current_state[3]<0.0:
+        #     quad_current_state[3:7] *= -1
 
         out_out = self.quad_opt.run_optimization(quad_current_state, return_x=return_x)
         return out_out
