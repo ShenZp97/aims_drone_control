@@ -62,6 +62,8 @@ class MavicDriver:
         self.__gps = self.__robot.getDevice('gps')
         self.__gyro = self.__robot.getDevice('gyro')
         self.__imu = self.__robot.getDevice('inertial unit')
+        self.__camera = self.__robot.getDevice('camera')
+        self.__camera.enable(2*self.__timestep)
         self.__gps.enable(self.__timestep)
         self.__gyro.enable(self.__timestep)
         self.__imu.enable(self.__timestep)
@@ -86,7 +88,7 @@ class MavicDriver:
             config = yaml.safe_load(f)
         self.mass = config['mass']
         self.warm_start_option = config['warm_start_option']
-        self.lqrcontroller = LQRController(config)
+        # self.lqrcontroller = LQRController(config)
         drone_config = QuadrotorParam(config)
         self.mpc_controller = Quad3DMPC(drone_config,
                                         r_cost=config['r_cost'],
@@ -113,6 +115,8 @@ class MavicDriver:
         self.u_ref = None
         self.n_state = 13
         self.n_control = 4
+
+        self.tracking_time = 0.0
 
 
         #ROS
@@ -147,9 +151,9 @@ class MavicDriver:
             else:
                 p_flu = pos
                 q_flu = q
-                Q = self.lqrcontroller.qtoQ(q_flu) # body to inertial
+                # Q = self.lqrcontroller.qtoQ(q_flu) # body to inertial
                 v_flu = vel
-                v_b = Q.T @ v_flu
+                # v_b = Q.T @ v_flu
                 w_flu = w
 
             # Publish Odom
@@ -169,7 +173,7 @@ class MavicDriver:
             self.odom_pub.publish(self.odom_msg)
 
 
-            state = np.hstack((p_flu, q_flu, v_b, w_flu)) # converted to FLU
+            # state = np.hstack((p_flu, q_flu, v_b, w_flu)) # converted to FLU
             state_vi = np.hstack((p_flu, q_flu, v_flu, w_flu)) # converted to FLU. Not body velocity
             self.odom = state_vi
 
@@ -179,19 +183,28 @@ class MavicDriver:
                         x_des = np.hstack((self.x_ref[0, 0:3], np.array([1.0, 0.0, 0.0, 0.0]), np.zeros(3), np.zeros(3)))
                         rospy.loginfo_once("Raising drone to the start point of the trajectory...")
                     else:
+                        self.tracking_time = self.simtime/1e3
                         self.tracking = True
 
                 if self.tracking:
-                    if np.linalg.norm(self.x_ref[-1, 0:3]-p_flu) <= self.reach_tolerance: # reached end of trajectory
+                    # if np.linalg.norm(self.x_ref[-1, 0:3]-p_flu) <= self.reach_tolerance: # reached end of trajectory
+                    if np.linalg.norm(self.x_ref[-1, 0:3]-p_flu) <= self.reach_tolerance and (self.simtime/1e3 - self.tracking_time)>=1.0: # reached end of trajectory and trajectory time is more than 1s
                         self.hover_pose = self.x_ref[-1, 0:7]
                         self.state = "hover"
                         self.tracking = False
                         rospy.loginfo("Tracking finished. Hover...")
                     else:
-                        current_idx = np.argmin(np.linalg.norm(self.x_ref[:, 0:3]-p_flu, axis=1))
+                        
                         # total_index = x_ref.shape[0]-1
                         # Trajectory tracking
-                        t_ref_now = self.t_ref[current_idx]
+
+                        # use state to get reference
+                        # current_idx = np.argmin(np.linalg.norm(self.x_ref[:, 0:3]-p_flu, axis=1))
+                        # t_ref_now = self.t_ref[current_idx]
+
+                        # use time to get reference
+                        t_ref_now = self.simtime/1e3 - self.tracking_time
+
                         t_ref_segment = np.linspace(t_ref_now, t_ref_now + self.mpc_controller.t_horizon, num=self.mpc_controller.n_nodes + 1)
 
                         x_ref_mpc = np.zeros((self.mpc_controller.n_nodes + 1, self.n_state))
@@ -277,8 +290,12 @@ class MavicDriver:
             m3 = np.sign(t3)*np.sqrt(np.abs(t3)/kt)
             m4 = np.sign(t4)*np.sqrt(np.abs(t4)/kt)
 
+            # if t1<0 or t2<0 or t3<0 or t4<0:
+            #     rospy.loginfo("Negative thrust command detected.")
+
             # motors_vel = np.clip([m1, m2, m3, m4], 31, 155.043)# min 1 N, max 25 N
-            motors_vel = np.clip([m1, m2, m3, m4], 0.0, 165.043)# min 0 N, max > 25 N
+            # motors_vel = np.clip([m1, m2, m3, m4], 0.0, 165.043)# min 0 N, max > 25 N
+            motors_vel = np.clip([m1, m2, m3, m4], -155.043, 155.043)# min 1 N, max 25 N
 
             self.__propellers[0].setVelocity(-motors_vel[0])
             self.__propellers[1].setVelocity(motors_vel[1])
@@ -333,8 +350,10 @@ class MavicDriver:
         if target_orientation.w < 0.0: # Avoid quaternion flipping
             target_orientation.w *= -1
             target_orientation.z *= -1
-        target_orientation.w = np.sqrt(1 - target_orientation.z**2)
-        self.goto_p[3:7] = np.array([target_orientation.w, 0.0, 0.0, target_orientation.z])
+            target_orientation.x *= -1
+            target_orientation.y *= -1
+        # target_orientation.w = np.sqrt(1 - target_orientation.z**2)
+        self.goto_p[3:7] = np.array([target_orientation.w, target_orientation.x, target_orientation.y, target_orientation.z])
         self.state = 'gotopoint'
         rospy.loginfo('Going to point...')
         # Code to move to a specific point
