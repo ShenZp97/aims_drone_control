@@ -1,4 +1,15 @@
 # AIMS Drone Control
+
+***Note:*** This branch is created for bidirectional drones.
+
+Run takeoff command:
+`rostopic pub -1 /drone_command std_msgs/String "{data: 'takeoff'}"`
+
+Load trajectory (***REMENBER to check the trajectory file name***):
+`rosrun load_traj load_scvx_traj.py -f scvx_traj.csv`
+***Replace scvx_traj.csv accordingly***
+
+
 This repository contains drone control code. Webots is used as the simulation. The code for real-world experiments via PX4 is also provided. This repo containts a LQR controller and a NMPC controller.
 
 For trajectory tracking, NMPC is used. Otherwise, LQR is used.
