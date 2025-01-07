@@ -372,8 +372,18 @@ class PX4Driver:
         if target_orientation.w < 0.0: # Avoid quaternion flipping
             target_orientation.w *= -1
             target_orientation.z *= -1
-        target_orientation.w = np.sqrt(1 - target_orientation.z**2)
-        self.goto_p[3:7] = np.array([target_orientation.w, 0.0, 0.0, target_orientation.z])
+            target_orientation.x *= -1
+            target_orientation.y *= -1
+        # target_orientation.w = np.sqrt(1 - target_orientation.z**2)
+        self.goto_p[3:7] = np.array([target_orientation.w, target_orientation.x, target_orientation.y, target_orientation.z])
+
+        # target_orientation = self.target_position.pose.orientation
+        # if target_orientation.w < 0.0: # Avoid quaternion flipping
+        #     target_orientation.w *= -1
+        #     target_orientation.z *= -1
+        # target_orientation.w = np.sqrt(1 - target_orientation.z**2)
+        # self.goto_p[3:7] = np.array([target_orientation.w, 0.0, 0.0, target_orientation.z])
+
         self.state = 'gotopoint'
         rospy.loginfo('Going to point...')
         # Code to move to a specific point
