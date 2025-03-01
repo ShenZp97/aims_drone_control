@@ -1,7 +1,9 @@
 # AIMS Drone Control
 This repository contains drone control code. Webots is used as the simulation. The code for real-world experiments via PX4 is also provided. This repo containts a LQR controller and a NMPC controller.
 
-For trajectory tracking, NMPC is used. Otherwise, LQR is used.
+For trajectory tracking, NMPC is used. Otherwise, LQR is used. Note: for the current version, NMPC is always used. But LQR is implemented already.
+
+This is mainly developed by [Zhipeng Shen](https://shenzp97.github.io/ZhipengSHEN/).
 
 # Acknowledgements
 The LQR controller is based on [CMU Optimal Control Lecture 15 ](https://youtu.be/AxmE2uTPglg?si=Tl6ZeRqFqFjlo2Ys).
